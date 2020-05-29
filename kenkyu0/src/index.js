@@ -299,7 +299,7 @@ class Chart extends React.Component {
     
     componentDidMount() {
       const url =
-        "./data/tsne_+_clusters_list.json"; //あ
+        "./data/tsne_+_clusters_list (1).json"; //あ
       window
         .fetch(url)
         .then(response => response.json())
