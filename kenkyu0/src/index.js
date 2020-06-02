@@ -11,6 +11,7 @@ class Chart extends React.Component {
         policy : 'ALL',
         reportYear : '',
         show : 'default',
+        money : '補正予算', 
         hideMinistries : new Set(),
         transform : {x:0,y:0,k:1}
       };
@@ -89,8 +90,12 @@ class Chart extends React.Component {
         .domain(d3.extent(data, (item) => +(item.objective_y)))
         .range([450, -450])
         .nice() 
+
+        if(this.state.money === '補正予算') {
+          console.log(this.state.money);
+        }
         const moneyScale = d3.scaleLog()
-        .domain(d3.extent(data, (item) => (+(item['執行額'])+10)))
+        .domain(d3.extent(data, (item) => (+(item[this.state.money])+10)))
         .base(10)
         .range([0, 15])
         .nice()
@@ -129,6 +134,8 @@ class Chart extends React.Component {
         }).map((v,i)=>{
           showData.push(v)
         })
+
+        console.log(showData);
   
         return (
           <div>
@@ -185,6 +192,18 @@ class Chart extends React.Component {
                   <option value='クールジャパン'>クールジャパン</option>
                   <option value='食育推進'>食育推進</option>
                   <option value='その他'>その他</option>
+                </select>
+              </div>
+            </div>
+            <div className='refine'>
+              <div>
+                <b>予算（仮） : </b>
+                <select name="select" id="select" defalutValue="補正予算" onChange ={(event)=>{this.setState({money:event.target.value})}}>
+                  <option value="補正予算">補正予算</option>
+                  <option value="当初予算">当初予算</option>
+                  <option value="前年度からの繰越し">前年度からの繰越し</option>
+                  <option value="翌年度への繰越し">翌年度への繰越し</option>
+                  <option value="執行額">執行額</option>
                 </select>
               </div>
             </div>
@@ -270,11 +289,11 @@ class Chart extends React.Component {
                           {v['府省庁']+', '}
                           {v['主要政策・施策']+', '}
                           {v['事業名']+', '}
-                          {+(v['執行額'])/10}
+                          {+(v[this.state.money])/10}
                         </title>
                         <circle style = {{cursor:'pointer'}}
                           cx={xScale(+(v.objective_x))} cy={yScale(+(v.objective_y))} 
-                          r={moneyScale(+(v['執行額'])+10)}
+                          r={moneyScale(+(v[this.state.money])+10)}
                           fill={v.fillColor}
                           />
                       </g>
@@ -299,7 +318,7 @@ class Chart extends React.Component {
     
     componentDidMount() {
       const url =
-        "./data/tsne_+_clusters_list (1).json"; //あ
+        "./data/tsne_+_clusters_list.json"; //あ
       window
         .fetch(url)
         .then(response => response.json())
