@@ -12,6 +12,7 @@ class Chart extends React.Component {
         reportYear : '',
         show : 'default',
         money : '補正予算', 
+        divisions : 'ALL',
         hideMinistries : new Set(),
         transform : {x:0,y:0,k:1}
       };
@@ -28,6 +29,7 @@ class Chart extends React.Component {
         const data = this.props.data
         console.log(data)
         const ministries = new Set()
+        
         for(const node of data){
           ministries.add(node['府省庁'])
         }
@@ -94,11 +96,11 @@ class Chart extends React.Component {
         if(this.state.money === '補正予算') {
           console.log(this.state.money);
         }
-        const moneyScale = d3.scaleLog()
-        .domain(d3.extent(data, (item) => (+(item[this.state.money])+10)))
-        .base(10)
-        .range([0, 15])
-        .nice()
+        //const moneyScale = d3.scaleLog()
+        //.domain(d3.extent(data, (item) => (+(item[this.state.money])+10)))
+        //.base(10)
+        //.range([0, 15])
+        //.nice()
 
         const showData = new Array()
         data.filter((v,cnt)=>{
@@ -131,9 +133,27 @@ class Chart extends React.Component {
           else{
             return false
           }
+        }).filter((v,i) => {
+          if(this.state.divisions === "ALL") {
+            return true
+          } else {
+            return v["会計区分"].includes(this.state.divisions)
+          }
+        }).filter((v,i) => {
+          if(+v[this.state.money] >= 1) {
+            return true
+          } else {
+            return false
+          }
         }).map((v,i)=>{
           showData.push(v)
         })
+
+        const moneyScale = d3.scaleLog()
+        .domain(d3.extent(showData, (item) => (+(item[this.state.money])+10)))
+        .base(10)
+        .range([0, 15])
+        //.nice()
 
         console.log(showData);
   
@@ -201,12 +221,23 @@ class Chart extends React.Component {
                 <select name="select" id="select" defalutValue="補正予算" onChange ={(event)=>{this.setState({money:event.target.value})}}>
                   <option value="補正予算">補正予算</option>
                   <option value="当初予算">当初予算</option>
-                  <option value="前年度からの繰越し">前年度からの繰越し</option>
-                  <option value="翌年度への繰越し">翌年度への繰越し</option>
+                  <option value="前年度から繰越し">前年度から繰越し</option>
+                  <option value="翌年度へ繰越し">翌年度へ繰越し</option>
                   <option value="執行額">執行額</option>
                 </select>
               </div>
             </div>
+            <div className='refine'>
+              <div>
+                <b>会計区分（仮） : </b>
+                <select name="select" id="select" defalutValue="ALL" onChange ={(event)=>{this.setState({divisions:event.target.value})}}>
+                  <option value="ALL">ALL</option>
+                  <option value="一般会計">一般会計</option>
+                  <option value="東日本大震災復興特別会計">東日本大震災復興特別会計</option>
+                </select>
+              </div>
+            </div>
+            
             <div className='refine'>
               <form onSubmit={(event)=>{
                   event.preventDefault()
